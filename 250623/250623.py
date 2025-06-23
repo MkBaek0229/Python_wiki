@@ -64,48 +64,29 @@ def load_csv():
         with open(file_path, newline='',encoding='utf-8') as csvfile:
             origin_my_data = pd.read_csv(csvfile)
 
-
             # reader = csv.reader(csvfile)
 
             # headers=next(reader) # csv.reader 함수로 csv파일 객체 읽음.
             #
             tree['columns'] = tuple(origin_my_data.columns)
-
             tree['show'] = 'headings'
 
             for col in origin_my_data.columns:
                 tree.heading(col, text=col)
                 tree.column(col, width=100, anchor='center')
+
+            #for row in origin_my_data.values:
+                # tree.insert('', 'end', values=list(row))
+                # TreeValues.append(list(row))
             for row in origin_my_data.values:
                 tree.insert('', 'end', values=list(row))
                 TreeValues.append(list(row))
 
 
 # todo 이상치 처리 함수
-def handle_missing_value():
-    global origin_my_data
-
-    for i, j in origin_my_data.items():
-        for e in j:
-            if i == ['날짜']:
-                print("true")
-                pass
-            elif pd.isna(e):
-                e = 0.0
-                pct25 = origin_my_data[i].quantile(.25)
-                pct75 = origin_my_data[i].quantile(.75)
-                iqr = pct75 - pct25
-                origin_my_data[i] = np.where((origin_my_data[i] < (pct25 - 1.5 * iqr)) | (origin_my_data[i] > (pct75 + 1.5 * iqr)), np.nan,
-                                     origin_my_data[i])
-
-
-
-
 
 def handle_missing_value():
     global origin_my_data
-
-
 
     for i, j in origin_my_data.items():
         # tree['columns'] = i
@@ -123,10 +104,19 @@ def handle_missing_value():
                 pct75 = origin_my_data[i].quantile(.75)
                 iqr = pct75 - pct25
                 origin_my_data[i] = np.where((origin_my_data[i] < (pct25 - 1.5 * iqr)) | (origin_my_data[i] > (pct75 + 1.5 * iqr)), np.nan,
-                                     origin_my_data[i])
-
+                                    origin_my_data[i])
 
     print(origin_my_data.isna().sum())
+
+    # reader = csv.reader(csvfile)
+
+    # headers=next(reader) # csv.reader 함수로 csv파일 객체 읽음.
+    #
+    tree['columns'] = tuple(origin_my_data.columns)
+
+    tree['show'] = 'headings'
+
+
 
 
 # todo 결측치 제거
@@ -146,6 +136,7 @@ def jager():
     #         pass
     #     else:
     #         origin_my_data.fillna(origin_my_data[i].mean())
+
 
 
 
