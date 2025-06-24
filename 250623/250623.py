@@ -81,7 +81,8 @@ def load_csv():
             for row in origin_my_data.values:
                 tree.insert('', 'end', values=list(row))
                 TreeValues.append(list(row))
-
+            for col in TreeValues:
+                print(col)
 
 # todo 이상치 처리 함수
 
@@ -111,10 +112,21 @@ def handle_missing_value():
     # reader = csv.reader(csvfile)
 
     # headers=next(reader) # csv.reader 함수로 csv파일 객체 읽음.
-    #
-    tree['columns'] = tuple(origin_my_data.columns)
+    tree.delete(*tree.get_children())
 
+    tree['columns'] = tuple(origin_my_data.columns)
     tree['show'] = 'headings'
+
+    for col in origin_my_data.columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=100, anchor='center')
+
+
+
+    for row in origin_my_data.values:
+        tree.insert('', 'end', values=list(row))
+
+
 
 
 
@@ -136,7 +148,17 @@ def jager():
     #         pass
     #     else:
     #         origin_my_data.fillna(origin_my_data[i].mean())
+    tree.delete(*tree.get_children())
 
+    tree['columns'] = tuple(origin_my_data.columns)
+    tree['show'] = 'headings'
+
+    for col in origin_my_data.columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=100, anchor='center')
+
+    for row in origin_my_data.values:
+        tree.insert('', 'end', values=list(row))
 
 
 
