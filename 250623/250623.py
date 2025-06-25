@@ -43,6 +43,7 @@ def sort_head(val):
 
 #todo tree 그리는 함수
 def draw_tree(df):
+    print(df)
     tree.delete(*tree.get_children())
     tree['columns'] = tuple(df.columns)
     tree['show'] = 'headings'
@@ -160,6 +161,41 @@ def stasum():
     historyData = origin_my_data.describe()
     load_csv(RENDER_REPLAY)
 
+
+# todo 드롭다운 메뉴 선택
+def dropdown_control(e):
+    global historyData
+    global historyData_copy
+    # DataFrame의 형태는 사용시 2차원 데이터
+    historyData_copy = historyData.copy()
+    historyData_copy = historyData[[e]]
+
+
+    load_csv(RENDER_SORT)
+
+# todo 검색 기능 함수
+def searching():
+    eget = entry_1.get()
+    lt = []
+    tt = []
+    for i in tree.get_children():
+        item_values = (tree.item(i, 'values'))
+        for j in range(len(item_values)):
+            lt.append(item_values[j])
+    for h in lt:
+        if eget == h[:3]:
+            tt.append(h)
+        else:
+            pass
+
+    res = pd.DataFrame({tree['columns']:tt})
+    draw_tree(res)
+
+    #         if eget == k:
+    #             lt.clear()
+    #             lt.append(h)
+    # print(lt)
+
 window = tkinter.Tk()
 window.title("test")
 window.geometry("1280x846")
@@ -174,16 +210,6 @@ values = []
 value_choice = tkinter.StringVar(window)
 
 
-
-def dropdown_control(e):
-    global historyData
-    global historyData_copy
-    # DataFrame의 형태는 사용시 2차원 데이터
-    historyData_copy = historyData.copy()
-    historyData_copy = historyData[[e]]
-
-
-    load_csv(RENDER_SORT)
 
 
 
@@ -209,8 +235,7 @@ def on_focus_out(event):
         entry_1.insert(0, "Enter text here...")
         entry_1.config(fg="gray") # Change text color to gray
 
-def searching():
-    print(entry_1.get())
+
 
 entry_frame = tkinter.Frame(window)
 entry_frame.pack(pady=10, padx=10, side=tkinter.TOP)
