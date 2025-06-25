@@ -42,16 +42,21 @@ def sort_head(val):
 
 
 #todo tree 그리는 함수
-def draw_tree(df):
-    print(df)
-    tree.delete(*tree.get_children())
-    tree['columns'] = tuple(df.columns)
-    tree['show'] = 'headings'
-    for col in df.columns:
-        tree.heading(col, text=col, command=lambda x=col : sort_head(x))
-        tree.column(col, width=100, anchor='center')
-    for row in df.values:
-        tree.insert('', 'end', values=list(row))
+def draw_tree(df, window_mode=False):
+    if not window_mode:
+        print("tree1 그리기 활성화")
+
+        tree.delete(*tree.get_children())
+        tree['columns'] = tuple(df.columns)
+        tree['show'] = 'headings'
+        for col in df.columns:
+            tree.heading(col, text=col, command=lambda x=col : sort_head(x))
+            tree.column(col, width=100, anchor='center')
+        for row in df.values:
+            tree.insert('', 'end', values=list(row))
+    else:
+        print("tree2 그리기 활성화")
+
 
 # todo 데이터 불러오는 함수
 def load_csv(code):
@@ -112,7 +117,7 @@ def handle_missing_value():
         # tree.insert('', 'end', values=j)
         # historyData.append(j)
         for e in j:
-            if i == ['날짜']:
+            if i == '날짜':
                 pass
             elif pd.isna(e):
                 e = 0.0
@@ -175,34 +180,46 @@ def dropdown_control(e):
 
 # todo 검색 기능 함수
 def searching():
-    eget = entry_1.get()
-    lt = []
-    tt = []
-    for i in tree.get_children():
-        item_values = (tree.item(i, 'values'))
-        for j in range(len(item_values)):
-            lt.append(item_values[j])
-    for h in lt:
-        if eget == h[:3]:
-            tt.append(h)
-        else:
-            pass
+    keyword = entry_1.get().strip()
+    if keyword == "" or keyword == "Enter text here...":
+        return  # 아무것도 입력하지 않으면 종료
 
-    res = pd.DataFrame({tree['columns']:tt})
-    draw_tree(res)
+    global historyData
 
-    #         if eget == k:
-    #             lt.clear()
-    #             lt.append(h)
-    # print(lt)
+    # 키워드가 포함된 행만 필터링 (부분 일치)
+    matched_df = historyData[historyData.apply(lambda row: row.astype(str).str.contains(keyword).any(), axis=1)]
+
+    # 결과 렌더링
+    draw_tree(matched_df)
+
+
+def save():
+    global historyData
+    s = historyData.to_csv('data.csv', index=False)
+    print(s)
+
+def viewgraph():
+
+
+    window2 = tkinter.Tk()
+    window2.title("graph")
+    window2.geometry("1000x500")
+    tree2 = ttk.Treeview(window2)
+    tree2.pack(fill='both', expand=1)
+
+    button = tkinter.Button(window2, text="테스트", command=lambda  : draw_tree(0,True))
+    button.pack()
+
 
 window = tkinter.Tk()
-window.title("test")
+window.title("main")
 window.geometry("1280x846")
 
 
 tree=ttk.Treeview(window)
 tree.pack(fill = 'both', expand=1 , side='bottom')
+
+
 
 # 드롭다운 메뉴에 표시될 값 목록
 values = []
@@ -226,23 +243,26 @@ combobox.bind("<<ComboboxSelected>>", lambda event : dropdown_control(value_choi
 
 # todo place holder를 위한 함수
 def on_focus_in(event):
-    if entry_1.get() == "Enter text here...":
+    if entry_1.get() == "특정셀의 값 검색":
         entry_1.delete(0, tkinter.END)
         entry_1.config(fg="black") # Change text color to black
 
 def on_focus_out(event):
     if entry_1.get() == "":
-        entry_1.insert(0, "Enter text here...")
+        entry_1.insert(0, "특정셀의 값 검색")
         entry_1.config(fg="gray") # Change text color to gray
 
 
 
-entry_frame = tkinter.Frame(window)
-entry_frame.pack(pady=10, padx=10, side=tkinter.TOP)
+# todo 검색 버튼
+searchbutton = tkinter.Button(window, text="검색", command=searching, bg='blue', fg='white')
+searchbutton.pack(side=tkinter.RIGHT, padx=5, ipadx=10)
 
-entry_1 = tkinter.Entry(entry_frame, width=20,fg='gray')
-entry_1.insert(0, "Enter text here...")
-entry_1.pack(side=tkinter.LEFT, padx=5)
+
+# todo 검색 입력창
+entry_1 = tkinter.Entry(window, width=20,fg='gray')
+entry_1.insert(0, "특정셀의 값 검색")
+entry_1.pack(side=tkinter.RIGHT,  padx=3 , ipady=5)
 
 entry_1.bind("<FocusIn>", on_focus_in)
 entry_1.bind("<FocusOut>", on_focus_out)
@@ -261,21 +281,19 @@ jagerbutton = tkinter.Button(window, text="결측치 처리",command=jager, bg='
 jagerbutton.pack(side=tkinter.LEFT)
 
 
-savebutton = tkinter.Button(window, text="csv 파일 저장")
+savebutton = tkinter.Button(window, text="csv 파일 저장", command=save, bg='blue', fg='white')
 savebutton.pack(side=tkinter.LEFT)
 
 shapebutton = tkinter.Button(window, text="통계 출력", command=stasum , bg='blue', fg='white')
 shapebutton.pack(side=tkinter.LEFT)
 
-searchbutton = tkinter.Button(window, text="검색", command=searching)
-searchbutton.pack(side=tkinter.LEFT)
 
-resetbutton = tkinter.Button(window, text="처음으로",command=lambda :load_csv(RENDER_RESET))
+resetbutton = tkinter.Button(window, text="처음으로",command=lambda :load_csv(RENDER_RESET), bg='blue', fg='white')
 resetbutton.pack(side=tkinter.LEFT)
 
-
+viewgraphbutton = tkinter.Button(window, text="그래프로 보기", command=viewgraph)
+viewgraphbutton.pack(side=tkinter.LEFT)
 
 
 
 window.mainloop()
-
